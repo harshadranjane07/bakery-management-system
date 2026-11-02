@@ -1,0 +1,195 @@
+/* ----------------------------------------------------
+   BAKERY PRODUCT MANAGEMENT SYSTEM - GLOBAL STYLES
+   Third-Year Computer Engineering Academic Project
+   Color Theme: Cream, Chocolate Brown, Light Brown, Soft Orange
+---------------------------------------------------- */
+
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+  --primary-brown: #4A2E18;
+  --primary-dark: #331F0F;
+  --secondary-brown: #8D5B4C;
+  --light-brown: #C68B59;
+  --soft-orange: #E07A5F;
+  --soft-orange-hover: #CC694F;
+  --golden-crust: #E9C46A;
+  --bakery-cream: #FAF3EB;
+  --bakery-cream-light: #FFFDF9;
+  --text-dark: #2C1A0E;
+  --text-muted: #796556;
+  --border-soft: #EADBC8;
+  --card-shadow: 0 4px 12px rgba(74, 46, 24, 0.08);
+  --card-hover-shadow: 0 8px 24px rgba(74, 46, 24, 0.14);
+}
+
+body {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bakery-cream);
+  color: var(--text-dark);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, .bakery-font, .font-playfair {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--primary-brown);
+}
+
+/* Custom buttons */
+.btn-bakery-primary {
+  background-color: var(--primary-brown);
+  border-color: var(--primary-brown);
+  color: #ffffff;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-bakery-primary:hover, .btn-bakery-primary:focus {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: #ffffff;
+}
+
+.btn-bakery-orange {
+  background-color: var(--soft-orange);
+  border-color: var(--soft-orange);
+  color: #ffffff;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-bakery-orange:hover, .btn-bakery-orange:focus {
+  background-color: var(--soft-orange-hover);
+  border-color: var(--soft-orange-hover);
+  color: #ffffff;
+}
+
+.btn-bakery-outline {
+  background-color: transparent;
+  border: 2px solid var(--primary-brown);
+  color: var(--primary-brown);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-bakery-outline:hover {
+  background-color: var(--primary-brown);
+  color: #ffffff;
+}
+
+/* Custom cards */
+.bakery-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.bakery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-hover-shadow);
+}
+
+/* Badges */
+.badge-category {
+  background-color: #F8E5D6;
+  color: var(--primary-brown);
+  font-weight: 500;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 20px;
+}
+
+.badge-stock {
+  background-color: #E3F2FD;
+  color: #1976D2;
+  font-weight: 500;
+  font-size: 0.8rem;
+  border-radius: 20px;
+}
+
+.badge-low-stock {
+  background-color: #FFEBEE;
+  color: #D32F2F;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-radius: 20px;
+}
+
+/* Page Headers */
+.page-header-banner {
+  background: linear-gradient(135deg, var(--primary-brown) 0%, #683E1E 100%);
+  color: #ffffff;
+  padding: 2.5rem 0;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.page-header-banner h1 {
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.page-header-banner p {
+  color: #F4D9C8;
+  margin-bottom: 0;
+  font-size: 1.05rem;
+}
+
+/* Admin layout styles */
+.admin-sidebar {
+  background-color: var(--primary-brown);
+  color: #FAF3EB;
+  min-height: calc(100vh - 70px);
+}
+
+.admin-sidebar .nav-link {
+  color: #F4D9C8;
+  font-weight: 500;
+  padding: 0.85rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  transition: all 0.2s;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.admin-sidebar .nav-link i {
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
+}
+
+/* Currency symbol helper */
+.price-tag {
+  color: var(--primary-brown);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+/* Forms */
+.form-control:focus, .form-select:focus {
+  border-color: var(--light-brown);
+  box-shadow: 0 0 0 0.25rem rgba(198, 139, 89, 0.25);
+}
+
+/* Student Project watermark/badge in footer */
+.student-badge {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  display: inline-block;
+  font-size: 0.85rem;
+  color: #E2CEBE;
+}

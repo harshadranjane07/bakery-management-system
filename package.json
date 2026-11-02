@@ -1,0 +1,23 @@
+{
+  "name": "bakery-product-management-system",
+  "version": "1.0.0",
+  "description": "MEAN Stack Bakery Product Management System - Academic Capstone Project",
+  "main": "backend/server.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/server.js",
+    "seed": "node backend/config/seed.js"
+  },
+  "keywords": [
+    "mean-stack",
+    "angular",
+    "nodejs",
+    "mongodb",
+    "express"
+  ],
+  "author": "Student Developer",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^18.0.9"
+  }
+}

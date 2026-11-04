@@ -9,52 +9,53 @@ const Category = require('../models/Category');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 
-const seedDatabase = async () => {
+const seedDatabase = async (clearExisting = true) => {
   try {
-    const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bakery_management_db';
-    console.log(`[Seed] Connecting to MongoDB at ${mongoURI}...`);
-    await mongoose.connect(mongoURI);
-    console.log('[Seed] Connected successfully.');
-
-    // Clear existing data
-    console.log('[Seed] Clearing existing collections...');
-    await User.deleteMany({});
-    await Category.deleteMany({});
-    await Product.deleteMany({});
-    await Order.deleteMany({});
+    if (clearExisting) {
+      console.log('[Seed] Clearing existing collections...');
+      await User.deleteMany({ role: { $in: ['admin', 'customer'] } });
+      await Category.deleteMany({});
+      await Product.deleteMany({});
+      await Order.deleteMany({});
+    }
 
     // 1. Create Admin & Sample Customer
-    console.log('[Seed] Creating admin and sample customer...');
-    const admin = await User.create({
-      name: 'Bakery Admin',
-      email: 'admin@bakery.com',
-      phone: '9876543210',
-      password: 'admin123', // Will be hashed by User pre-save hook
-      role: 'admin',
-      address: {
-        street: '101 Baker Street, Main Market',
-        city: 'Mumbai',
-        state: 'Maharashtra',
-        pincode: '400001'
-      }
-    });
+    console.log('[Seed] Ensuring admin and sample customer exist...');
+    let admin = await User.findOne({ email: 'admin@bakery.com' });
+    if (!admin) {
+      admin = await User.create({
+        name: 'Bakery Admin',
+        email: 'admin@bakery.com',
+        phone: '9876543210',
+        password: 'admin123',
+        role: 'admin',
+        address: {
+          street: '101 Baker Street, Main Market',
+          city: 'Mumbai',
+          state: 'Maharashtra',
+          pincode: '400001'
+        }
+      });
+      console.log(`[Seed] Created Admin: ${admin.email}`);
+    }
 
-    const customer = await User.create({
-      name: 'Rahul Sharma',
-      email: 'rahul@bakery.com',
-      phone: '9812345678',
-      password: 'customer123', // Will be hashed by User pre-save hook
-      role: 'customer',
-      address: {
-        street: 'Flat 402, Sunshine Apartments, MG Road',
-        city: 'Pune',
-        state: 'Maharashtra',
-        pincode: '411001'
-      }
-    });
-
-    console.log(`[Seed] Created Admin: ${admin.email}`);
-    console.log(`[Seed] Created Customer: ${customer.email}`);
+    let customer = await User.findOne({ email: 'rahul@bakery.com' });
+    if (!customer) {
+      customer = await User.create({
+        name: 'Rahul Sharma',
+        email: 'rahul@bakery.com',
+        phone: '9812345678',
+        password: 'customer123',
+        role: 'customer',
+        address: {
+          street: 'Flat 402, Sunshine Apartments, MG Road',
+          city: 'Pune',
+          state: 'Maharashtra',
+          pincode: '411001'
+        }
+      });
+      console.log(`[Seed] Created Customer: ${customer.email}`);
+    }
 
     // 2. Create Categories
     console.log('[Seed] Creating categories...');
@@ -98,10 +99,15 @@ const seedDatabase = async () => {
 
     const categoryMap = {};
     for (const cat of categoriesData) {
-      const created = await Category.create(cat);
-      categoryMap[cat.name] = created._id;
+      const existing = await Category.findOne({ name: cat.name });
+      if (existing) {
+        categoryMap[cat.name] = existing._id;
+      } else {
+        const created = await Category.create(cat);
+        categoryMap[cat.name] = created._id;
+      }
     }
-    console.log(`[Seed] Created ${categoriesData.length} categories.`);
+    console.log(`[Seed] Categories verified: ${Object.keys(categoryMap).length}`);
 
     // 3. Create Sample Bakery Products
     console.log('[Seed] Creating products...');
@@ -201,7 +207,7 @@ const seedDatabase = async () => {
         category: categoryMap['Cupcakes'],
         price: 70,
         description: 'Oven-fresh jumbo chocolate chip muffin with a tender, moist crumb and crunchy caramelized muffin top.',
-        stock: 4, // low stock test!
+        stock: 4,
         imageUrl: 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=600&auto=format&fit=crop&q=80',
         unit: 'piece',
         isFeatured: false
@@ -210,57 +216,76 @@ const seedDatabase = async () => {
 
     const createdProducts = [];
     for (const prod of productsData) {
-      const p = await Product.create(prod);
-      createdProducts.push(p);
+      const existing = await Product.findOne({ name: prod.name });
+      if (!existing) {
+        const p = await Product.create(prod);
+        createdProducts.push(p);
+      } else {
+        createdProducts.push(existing);
+      }
     }
-    console.log(`[Seed] Created ${createdProducts.length} bakery products.`);
+    console.log(`[Seed] Products ready: ${createdProducts.length}`);
 
-    // 4. Create Sample Orders for Demonstration
-    console.log('[Seed] Creating demo orders...');
-    const demoOrder = await Order.create({
-      customer: customer._id,
-      items: [
-        {
-          product: createdProducts[0]._id,
-          name: createdProducts[0].name,
-          price: createdProducts[0].price,
-          quantity: 1,
-          imageUrl: createdProducts[0].imageUrl
+    // 4. Create Sample Orders
+    const ordersCount = await Order.countDocuments();
+    if (ordersCount === 0 && customer && createdProducts.length > 0) {
+      console.log('[Seed] Creating demo orders...');
+      await Order.create({
+        customer: customer._id,
+        items: [
+          {
+            product: createdProducts[0]._id,
+            name: createdProducts[0].name,
+            price: createdProducts[0].price,
+            quantity: 1,
+            imageUrl: createdProducts[0].imageUrl
+          },
+          {
+            product: createdProducts[4]._id,
+            name: createdProducts[4].name,
+            price: createdProducts[4].price,
+            quantity: 2,
+            imageUrl: createdProducts[4].imageUrl
+          }
+        ],
+        totalAmount: 700,
+        shippingAddress: {
+          fullName: customer.name,
+          phone: customer.phone,
+          address: customer.address.street,
+          city: customer.address.city,
+          pincode: customer.address.pincode
         },
-        {
-          product: createdProducts[4]._id,
-          name: createdProducts[4].name,
-          price: createdProducts[4].price,
-          quantity: 2,
-          imageUrl: createdProducts[4].imageUrl
-        }
-      ],
-      totalAmount: 550 + 75 * 2, // 700
-      shippingAddress: {
-        fullName: customer.name,
-        phone: customer.phone,
-        address: customer.address.street,
-        city: customer.address.city,
-        pincode: customer.address.pincode
-      },
-      paymentMethod: 'Cash on Delivery',
-      orderStatus: 'Confirmed',
-      orderNotes: 'Please deliver after 5 PM.'
-    });
+        paymentMethod: 'Cash on Delivery',
+        orderStatus: 'Confirmed',
+        orderNotes: 'Please deliver after 5 PM.'
+      });
+      console.log('[Seed] Demo order created.');
+    }
 
-    console.log(`[Seed] Created demo order: #${demoOrder._id}`);
     console.log('==============================================');
     console.log('Seed completed successfully!');
     console.log('Admin Account: admin@bakery.com / admin123');
     console.log('Customer Account: rahul@bakery.com / customer123');
     console.log('==============================================');
-
-    await mongoose.disconnect();
-    process.exit(0);
   } catch (error) {
     console.error('[Seed] Error seeding database:', error);
-    process.exit(1);
   }
 };
 
-seedDatabase();
+// If run directly from terminal:
+if (require.main === module) {
+  const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/bakery_management_db';
+  console.log(`[Seed] Connecting to MongoDB at ${mongoURI}...`);
+  mongoose.connect(mongoURI).then(async () => {
+    console.log('[Seed] Connected.');
+    await seedDatabase(true);
+    await mongoose.disconnect();
+    process.exit(0);
+  }).catch((err) => {
+    console.error('[Seed] Connection failed:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = seedDatabase;

@@ -37,6 +37,20 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Database seed / initialization endpoint for cloud deployments
+app.get('/api/setup/seed', async (req, res) => {
+  try {
+    const seedDatabase = require('./config/seed');
+    await seedDatabase(false);
+    res.status(200).json({
+      success: true,
+      message: 'Database initialized successfully with admin account, categories, and bakery products!'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // Serve Angular production build if present (Unified full-stack support)
 const frontendDist = path.join(__dirname, '..', 'frontend', 'dist', 'frontend', 'browser');
 if (fs.existsSync(frontendDist)) {

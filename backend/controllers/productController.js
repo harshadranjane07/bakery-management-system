@@ -63,7 +63,7 @@ const getFeaturedProducts = async (req, res) => {
   try {
     const products = await Product.find({ isFeatured: true })
       .populate('category', 'name')
-      .limit(6);
+      .limit(8);
 
     res.status(200).json({
       success: true,

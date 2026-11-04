@@ -95,8 +95,8 @@ import { RouterModule } from '@angular/router';
             &copy; 2026 The Golden Crust Bakery. All Rights Reserved.
           </div>
           <div class="col-md-6 text-center text-md-end">
-            <span class="student-badge">
-              <i class="bi bi-mortarboard me-1 text-warning"></i> Third-Year Computer Engineering Academic Project (MEAN Stack)
+            <span>
+              <i class="bi bi-heart-fill text-danger me-1"></i> Freshly Baked Daily with Pure Ingredients & Love
             </span>
           </div>
         </div>

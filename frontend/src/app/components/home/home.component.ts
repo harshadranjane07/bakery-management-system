@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { CategoryService } from '../../services/category.service';
 import { CartService } from '../../services/cart.service';
@@ -10,7 +11,7 @@ import { Category } from '../../models/category.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div>
       <!-- HERO BANNER -->
@@ -29,12 +30,42 @@ import { Category } from '../../models/category.model';
               <p class="lead mb-4 hero-subtitle">
                 Experience the magic of handcrafted artisanal cakes, flaky pastries, crusty sourdough breads, and melt-in-the-mouth brownies.
               </p>
-              <div class="d-flex flex-wrap gap-3">
+
+              <!-- SEARCH BOX ON HOME PAGE -->
+              <div class="home-search-container mb-4">
+                <form (ngSubmit)="onSearch()" class="d-flex align-items-center p-1 bg-white rounded-pill shadow-lg" style="max-width: 520px;">
+                  <span class="ps-3 pe-2 text-muted">
+                    <i class="bi bi-search fs-5"></i>
+                  </span>
+                  <input
+                    type="text"
+                    class="form-control border-0 shadow-none text-dark bg-transparent"
+                    placeholder="Search cakes, pastries, brownies, bread..."
+                    [(ngModel)]="searchQuery"
+                    name="homeSearch"
+                  />
+                  <button type="submit" class="btn btn-bakery-orange rounded-pill px-4 fw-semibold py-2">
+                    Search
+                  </button>
+                </form>
+
+                <!-- Quick Search Tags -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-2 ps-2 small text-light-cream">
+                  <span class="text-white-50">Popular:</span>
+                  <button type="button" class="btn btn-xs search-tag-pill" (click)="searchTag('Chocolate Cake')">Chocolate Cake</button>
+                  <button type="button" class="btn btn-xs search-tag-pill" (click)="searchTag('Brownies')">Brownies</button>
+                  <button type="button" class="btn btn-xs search-tag-pill" (click)="searchTag('Pastry')">Pastry</button>
+                  <button type="button" class="btn btn-xs search-tag-pill" (click)="searchTag('Bread')">Sourdough</button>
+                  <button type="button" class="btn btn-xs search-tag-pill" (click)="searchTag('Cookies')">Cookies</button>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap gap-3 pt-2">
                 <a routerLink="/products" class="btn btn-lg btn-bakery-orange rounded-pill px-4 shadow">
-                  <i class="bi bi-bag-heart me-2"></i> Explore Our Menu
+                  <i class="bi bi-bag-heart me-2"></i> Explore Our Full Menu
                 </a>
                 <a routerLink="/products" [queryParams]="{ featured: true }" class="btn btn-lg btn-outline-light rounded-pill px-4">
-                  <i class="bi bi-star-fill text-warning me-2"></i> Featured Bakes
+                  <i class="bi bi-star-fill text-warning me-2"></i> Chef's Specials
                 </a>
               </div>
             </div>
@@ -142,7 +173,7 @@ import { Category } from '../../models/category.model';
           </div>
 
           <!-- Alert Toast -->
-          <div *ngIf="cartAlert" class="alert alert-success alert-dismissible fade show" role="alert">
+          <div *ngIf="cartAlert" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i> {{ cartAlert }}
             <button type="button" class="btn-close" (click)="cartAlert = ''"></button>
           </div>
@@ -153,7 +184,7 @@ import { Category } from '../../models/category.model';
           </div>
 
           <div *ngIf="!loadingProducts" class="row g-4">
-            <div *ngFor="let product of featuredProducts" class="col-md-6 col-lg-4">
+            <div *ngFor="let product of featuredProducts" class="col-sm-6 col-lg-4 col-xl-3">
               <div class="bakery-card h-100 d-flex flex-column">
                 <div class="position-relative product-img-box">
                   <img [src]="product.imageUrl" [alt]="product.name" class="card-img-top" />
@@ -167,24 +198,24 @@ import { Category } from '../../models/category.model';
                     {{ product.stock > 0 ? 'In Stock (' + product.stock + ')' : 'Out of Stock' }}
                   </span>
                 </div>
-                <div class="card-body d-flex flex-column p-4">
+                <div class="card-body d-flex flex-column p-3">
                   <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h5 class="card-title fw-bold mb-0 text-dark">{{ product.name }}</h5>
-                    <span class="price-tag">₹{{ product.price }}</span>
+                    <h6 class="card-title fw-bold mb-0 text-dark text-truncate" [title]="product.name">{{ product.name }}</h6>
+                    <span class="price-tag fs-6">₹{{ product.price }}</span>
                   </div>
-                  <p class="card-text text-muted small flex-grow-1">
+                  <p class="card-text text-muted small flex-grow-1 text-truncate-2">
                     {{ product.description }}
                   </p>
-                  <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
-                    <a [routerLink]="['/products', product._id]" class="btn btn-sm btn-link text-decoration-none p-0 text-brown">
-                      View Details <i class="bi bi-chevron-right"></i>
+                  <div class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
+                    <a [routerLink]="['/products', product._id]" class="btn btn-sm btn-link text-decoration-none p-0 text-brown small">
+                      Details <i class="bi bi-chevron-right"></i>
                     </a>
                     <button
                       class="btn btn-sm btn-bakery-orange rounded-pill px-3"
                       [disabled]="product.stock <= 0"
                       (click)="addToCart(product)"
                     >
-                      <i class="bi bi-cart-plus me-1"></i> Add to Cart
+                      <i class="bi bi-cart-plus me-1"></i> Add
                     </button>
                   </div>
                 </div>
@@ -211,7 +242,7 @@ import { Category } from '../../models/category.model';
               </span>
               <h2 class="display-6 fw-bold mb-3">Pure Ingredients, Old-World Baking Heritage</h2>
               <p class="text-muted">
-                Started as a local student-led culinary vision, <strong>The Golden Crust Bakery</strong> is dedicated
+                At <strong>The Golden Crust Bakery</strong>, we are dedicated
                 to restoring the art of authentic slow-fermented breads and preservative-free cakes.
               </p>
               <p class="text-muted">
@@ -228,7 +259,7 @@ import { Category } from '../../models/category.model';
                 <div class="col-6">
                   <div class="d-flex align-items-center">
                     <i class="bi bi-check-circle-fill text-success fs-4 me-2"></i>
-                    <span class="fw-semibold">Custom Birthday Cakes</span>
+                    <span class="fw-semibold">Custom Celebration Cakes</span>
                   </div>
                 </div>
                 <div class="col-6">
@@ -264,7 +295,7 @@ import { Category } from '../../models/category.model';
                   <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                 </div>
                 <p class="text-muted small fst-italic">
-                  "The Chocolate Cake ordered for my brother's birthday was extraordinary! Rich ganache, perfectly balanced sweetness, and delivered within 40 minutes."
+                  "The Chocolate Cake ordered for our family celebration was extraordinary! Rich ganache, perfectly balanced sweetness, and delivered within 40 minutes."
                 </p>
                 <h6 class="fw-bold mb-0">Priya Kulkarni</h6>
                 <small class="text-muted">Pune</small>
@@ -276,10 +307,10 @@ import { Category } from '../../models/category.model';
                   <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                 </div>
                 <p class="text-muted small fst-italic">
-                  "Their sourdough bread and chocolate chip cookies are unmatched in town. Genuine artisanal quality at very reasonable student-friendly prices."
+                  "Their sourdough bread and chocolate chip cookies are unmatched in town. Genuine artisanal quality at very reasonable prices."
                 </p>
                 <h6 class="fw-bold mb-0">Amit Deshmukh</h6>
-                <small class="text-muted">Food Blogger</small>
+                <small class="text-muted">Food Enthusiast</small>
               </div>
             </div>
             <div class="col-md-4">
@@ -288,10 +319,10 @@ import { Category } from '../../models/category.model';
                   <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                 </div>
                 <p class="text-muted small fst-italic">
-                  "Smooth ordering experience and the brownies are so fudgy and warm. Definitely ordering again for our college fest!"
+                  "Smooth ordering experience and the fudge brownies are so gooey and warm. Definitely my go-to bakery now!"
                 </p>
                 <h6 class="fw-bold mb-0">Sneha Patil</h6>
-                <small class="text-muted">College Student</small>
+                <small class="text-muted">Verified Customer</small>
               </div>
             </div>
           </div>
@@ -313,12 +344,12 @@ import { Category } from '../../models/category.model';
   styles: [`
     .hero-section {
       background: url('https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat;
-      min-height: 520px;
+      min-height: 540px;
     }
     .hero-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(90deg, rgba(46, 27, 14, 0.92) 0%, rgba(46, 27, 14, 0.75) 60%, rgba(46, 27, 14, 0.5) 100%);
+      background: linear-gradient(90deg, rgba(46, 27, 14, 0.92) 0%, rgba(46, 27, 14, 0.78) 60%, rgba(46, 27, 14, 0.55) 100%);
     }
     .hero-heading {
       font-family: 'Playfair Display', serif;
@@ -327,6 +358,20 @@ import { Category } from '../../models/category.model';
     .hero-subtitle {
       color: #F5E5D8;
       max-width: 540px;
+    }
+    .search-tag-pill {
+      background-color: rgba(255, 255, 255, 0.18);
+      color: #FFFDF9;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      padding: 0.15rem 0.6rem;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+    .search-tag-pill:hover {
+      background-color: var(--soft-orange);
+      color: #ffffff;
+      border-color: var(--soft-orange);
     }
     .divider {
       width: 60px;
@@ -355,7 +400,7 @@ import { Category } from '../../models/category.model';
       object-fit: cover;
     }
     .product-img-box {
-      height: 200px;
+      height: 180px;
       overflow: hidden;
     }
     .product-img-box img {
@@ -371,18 +416,27 @@ import { Category } from '../../models/category.model';
       color: var(--primary-brown);
       font-weight: 600;
     }
+    .text-truncate-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 38px;
+    }
   `]
 })
 export class HomeComponent implements OnInit {
   productService = inject(ProductService);
   categoryService = inject(CategoryService);
   cartService = inject(CartService);
+  router = inject(Router);
 
   categories: Category[] = [];
   featuredProducts: Product[] = [];
   loadingCategories = true;
   loadingProducts = true;
   cartAlert = '';
+  searchQuery = '';
 
   defaultCatImg = 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80';
 
@@ -416,6 +470,22 @@ export class HomeComponent implements OnInit {
       error: () => {
         this.loadingProducts = false;
       }
+    });
+  }
+
+  onSearch(): void {
+    if (this.searchQuery && this.searchQuery.trim()) {
+      this.router.navigate(['/products'], {
+        queryParams: { search: this.searchQuery.trim() }
+      });
+    } else {
+      this.router.navigate(['/products']);
+    }
+  }
+
+  searchTag(tag: string): void {
+    this.router.navigate(['/products'], {
+      queryParams: { search: tag }
     });
   }
 
